@@ -1,0 +1,155 @@
+#!/usr/bin/env node
+
+import { platform } from "os"
+import { existsSync } from "fs"
+
+interface IBrowser {
+    name: string
+    cmd: string
+}
+
+const BROWSERS = {
+    windows: [
+        { name: "Chrome", cmd: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" },
+        { name: "Firefox", cmd: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" },
+        { name: "Edge", cmd: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" },
+        { name: "Brave", cmd: "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe" },
+        { name: "Vivaldi", cmd: "C:\\Program Files\\Vivaldi\\Application\\vivaldi.exe" },
+        { name: "Opera", cmd: "C:\\Program Files\\Opera\\launcher.exe" },
+    ],
+    darwin: [
+        { name: "Chrome", cmd: "/Applications/Google Chrome.app" },
+        { name: "Safari", cmd: "/Applications/Safari.app" },
+        { name: "Firefox", cmd: "/Applications/Firefox.app" },
+        { name: "Brave", cmd: "/Applications/Brave Browser.app" },
+        { name: "Edge", cmd: "/Applications/Microsoft Edge.app" },
+        { name: "Vivaldi", cmd: "/Applications/Vivaldi.app" },
+        { name: "Opera", cmd: "/Applications/Opera.app" },
+    ],
+    linux: [
+        { name: "Chromium", cmd: "chromium" },
+        { name: "Firefox", cmd: "firefox" },
+        { name: "Chrome", cmd: "google-chrome" },
+        { name: "Brave", cmd: "brave-browser" },
+        { name: "Vivaldi", cmd: "vivaldi" },
+        { name: "Opera", cmd: "opera" },
+    ]
+}
+
+/**
+ * Checks if a command exists in the system.
+ * @param command 
+ * @returns 
+ */
+function which(command: string): string | null {
+    try {
+        let { execSync } = require("child_process")
+        let output = execSync(`which ${command}`).toString().trim() || null
+        return output
+    }
+    catch (error) {
+        return null
+    }
+}
+
+function detectBrowsers() {
+    let os = platform()
+    let foundBrowsers: IBrowser[] = []
+
+    if (os === "win32") {
+        for (let browser of BROWSERS.windows) {
+            if (existsSync(browser.cmd)) {
+                foundBrowsers.push(browser)
+            }
+        }
+    }
+    else if (os === "darwin") {
+        for (let browser of BROWSERS.darwin) {
+            if (existsSync(browser.cmd)) {
+                foundBrowsers.push(browser)
+            }
+        }
+    }
+    else if (os === "linux") {
+        for (let browser of BROWSERS.linux) {
+            if (which(browser.cmd)) {
+                foundBrowsers.push(browser)
+            }
+        }
+    }
+    else {
+        console.log("Unsupported OS")
+        return
+    }
+
+    return foundBrowsers
+}
+
+/**
+ * Launches the browser as a kiosk app based on the operating system with preferred browser.
+ * @param url 
+ */
+function launchApp(url: string) {
+    let os = platform()
+    let detectedBrowsers = detectBrowsers()
+    let browserToUse: IBrowser | undefined
+    let preferredBrowsers = {
+        win32: ["Chrome", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
+        darwin: ["Chrome", "Safari", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
+        linux: ["Chromium", "Firefox", "Brave", "Chrome", "Vivaldi", "Opera"],
+    }
+
+    console.log(`Detected OS: ${os}`)
+    console.log(`Detected browsers: ${detectedBrowsers ? detectedBrowsers.map(b => b.name).join(", ") : "None"}`)
+
+    url = url.startsWith("http") ? url : url.startsWith("localhost") ? `http://${url}` : `https://${url}`
+
+    if (detectedBrowsers) {
+        let osName = os as "win32" | "darwin" | "linux"
+        let browsersForOS = preferredBrowsers[osName] || []
+        let preferredBrowser = browsersForOS.find(name => detectedBrowsers.some(b => b.name === name))
+
+        if (preferredBrowser) {
+            browserToUse = detectedBrowsers.find(b => b.name === preferredBrowser)
+        } else {
+            // Fallback to the first detected browser!
+            browserToUse = detectedBrowsers[0]
+        }
+
+        if (browserToUse) {
+            require("child_process").exec(`"${browserToUse.cmd}" --app="${url}" --window-size=960,800 --new-window --user-data-dir="/tmp/temp-profile"`)
+        }
+        else {
+            console.error("No suitable browser found to launch the app!")
+            process.exit(1)
+        }
+    }
+    else {
+        // Fallback to default browser launch based on OS
+        if (os === "win32") {
+            require("child_process").exec(`start "" "${url}"`)
+        }
+        else if (os === "darwin") {
+            require("child_process").exec(`open "${url}"`)
+        }
+        else if (os === "linux") {
+            require("child_process").exec(`xdg-open "${url}"`)
+        }
+        else {
+            console.log("Unsupported OS for launching app!")
+        }
+    }
+}
+
+function start() {
+    let args = process.argv.slice(2)
+
+    if (args.length === 0) {
+        console.error("No URL provided! Usage: npx oxr <url>")
+        process.exit(1)
+    }
+
+    launchApp(args[0] as string)
+}
+
+start()

@@ -1,0 +1,20 @@
+{
+  "name": "oxr",
+  "module": "src/index.ts",
+  "type": "module",
+  "license": "MIT",
+  "version": "0.0.1",
+  "bin": {
+    "oxr": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir . --target node"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
