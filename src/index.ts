@@ -106,6 +106,8 @@ function launchApp(url: string) {
     url = url.startsWith("http") ? url : url.startsWith("localhost") ? `http://${url}` : `https://${url}`
 
     if (detectedBrowsers) {
+        let width = 960
+        let height = 800
         let osName = os as "win32" | "darwin" | "linux"
         let browsersForOS = preferredBrowsers[osName] || []
         let preferredBrowser = browsersForOS.find(name => detectedBrowsers.some(b => b.name === name))
@@ -119,7 +121,26 @@ function launchApp(url: string) {
         }
 
         if (browserToUse) {
-            exec(`"${browserToUse.cmd}" --app="${url}" --window-size=960,800 --new-window --user-data-dir="/tmp/temp-profile"`)
+            let sizeInfo = `--window-size=${width},${height}`
+
+            if (os !== "darwin") {
+                if (browserToUse.cmd.includes("Firefox")) {
+                    sizeInfo = `--width=${width} --height=${height}`
+                    exec(`"${browserToUse.cmd}" "${url}" ${sizeInfo}`)
+                }
+                else {
+                    exec(`"${browserToUse.cmd}" --app="${url}" ${sizeInfo} --new-window --user-data-dir="/tmp/temp-profile"`)                    
+                }
+            }
+            else {
+                if (browserToUse.cmd.includes("Firefox")) {
+                    sizeInfo = `--width=${width} --height=${height}`
+                    exec(`open -na "${browserToUse.cmd}" "${url}" ${sizeInfo}`)
+                }
+                else {
+                    exec(`open -na "${browserToUse.cmd}" --args --app="${url}" --new-window --user-data-dir="/tmp/temp-profile"`)
+                }
+            }
         }
         else {
             tryDefaultBrowser = true
