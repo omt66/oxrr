@@ -3,13 +3,14 @@
   "module": "src/index.ts",
   "type": "module",
   "license": "MIT",
-  "version": "0.0.7",
+  "version": "0.0.10",
   "bin": {
     "oxrr": "index.js"
   },
   "scripts": {
     "dev": "bun run src/index.ts",
-    "build": "bun build src/index.ts --outdir . --target node"
+    "build": "bun build src/index.ts --outdir . --target node",
+    "xpublish": "bun run build && npm publish"
   },
   "devDependencies": {
     "@types/bun": "latest"
