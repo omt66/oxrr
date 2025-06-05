@@ -2,6 +2,7 @@
 
 import { platform } from "os"
 import { existsSync } from "fs"
+import { exec, execSync } from "child_process"
 
 interface IBrowser {
     name: string
@@ -43,7 +44,6 @@ const BROWSERS = {
  */
 function which(command: string): string | null {
     try {
-        let { execSync } = require("child_process")
         let output = execSync(`which ${command}`).toString().trim() || null
         return output
     }
@@ -127,13 +127,13 @@ function launchApp(url: string) {
     else {
         // Fallback to default browser launch based on OS
         if (os === "win32") {
-            require("child_process").exec(`start "" "${url}"`)
+            exec(`start "" "${url}"`)
         }
         else if (os === "darwin") {
-            require("child_process").exec(`open "${url}"`)
+            exec(`open "${url}"`)
         }
         else if (os === "linux") {
-            require("child_process").exec(`xdg-open "${url}"`)
+            exec(`xdg-open "${url}"`)
         }
         else {
             console.log("Unsupported OS for launching app!")
