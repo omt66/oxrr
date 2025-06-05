@@ -93,6 +93,7 @@ function launchApp(url: string) {
     let os = platform()
     let detectedBrowsers = detectBrowsers()
     let browserToUse: IBrowser | undefined
+    let tryDefaultBrowser = false
     let preferredBrowsers = {
         win32: ["Chrome", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
         darwin: ["Chrome", "Safari", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
@@ -111,20 +112,21 @@ function launchApp(url: string) {
 
         if (preferredBrowser) {
             browserToUse = detectedBrowsers.find(b => b.name === preferredBrowser)
-        } else {
+        }
+        else {
             // Fallback to the first detected browser!
             browserToUse = detectedBrowsers[0]
         }
 
         if (browserToUse) {
-            require("child_process").exec(`"${browserToUse.cmd}" --app="${url}" --window-size=960,800 --new-window --user-data-dir="/tmp/temp-profile"`)
+            exec(`"${browserToUse.cmd}" --app="${url}" --window-size=960,800 --new-window --user-data-dir="/tmp/temp-profile"`)
         }
         else {
-            console.error("No suitable browser found to launch the app!")
-            process.exit(1)
+            tryDefaultBrowser = true
         }
     }
-    else {
+
+    if (tryDefaultBrowser) {
         // Fallback to default browser launch based on OS
         if (os === "win32") {
             exec(`start "" "${url}"`)

@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-import { createRequire } from "node:module";
-var __require = /* @__PURE__ */ createRequire(import.meta.url);
 
 // src/index.ts
 import { platform } from "os";
 import { existsSync } from "fs";
+import { exec, execSync } from "child_process";
 var BROWSERS = {
   windows: [
     { name: "Chrome", cmd: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" },
@@ -34,7 +33,6 @@ var BROWSERS = {
 };
 function which(command) {
   try {
-    let { execSync } = __require("child_process");
     let output = execSync(`which ${command}`).toString().trim() || null;
     return output;
   } catch (error) {
@@ -72,6 +70,7 @@ function launchApp(url) {
   let os = platform();
   let detectedBrowsers = detectBrowsers();
   let browserToUse;
+  let tryDefaultBrowser = false;
   let preferredBrowsers = {
     win32: ["Chrome", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
     darwin: ["Chrome", "Safari", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
@@ -90,18 +89,18 @@ function launchApp(url) {
       browserToUse = detectedBrowsers[0];
     }
     if (browserToUse) {
-      __require("child_process").exec(`"${browserToUse.cmd}" --app="${url}" --window-size=960,800 --new-window --user-data-dir="/tmp/temp-profile"`);
+      exec(`"${browserToUse.cmd}" --app="${url}" --window-size=960,800 --new-window --user-data-dir="/tmp/temp-profile"`);
     } else {
-      console.error("No suitable browser found to launch the app!");
-      process.exit(1);
+      tryDefaultBrowser = true;
     }
-  } else {
+  }
+  if (tryDefaultBrowser) {
     if (os === "win32") {
-      __require("child_process").exec(`start "" "${url}"`);
+      exec(`start "" "${url}"`);
     } else if (os === "darwin") {
-      __require("child_process").exec(`open "${url}"`);
+      exec(`open "${url}"`);
     } else if (os === "linux") {
-      __require("child_process").exec(`xdg-open "${url}"`);
+      exec(`xdg-open "${url}"`);
     } else {
       console.log("Unsupported OS for launching app!");
     }
