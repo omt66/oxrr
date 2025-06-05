@@ -1,6 +1,12 @@
-# oxrr (Open eXecuteR)
+# oxrr (Open eXecuteRR)
 
-A browser runner in an app mode (aka kiosk mode)
+A browser runner in an app mode (aka kiosk mode).
 
-PS: oxr name in npm wasn't available :)
+## Examples:
+
+* npx oxrr bing.com
+* npx oxrr https://google.com
+* npx oxr localhost:8080
+
+**PS:** *oxr* name in npm wasn't available, now I use *oxrr* 🙄😉
  
