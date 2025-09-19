@@ -97,7 +97,7 @@ function launchApp(url: string) {
     let preferredBrowsers = {
         win32: ["Chrome", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
         darwin: ["Chrome", "Safari", "Firefox", "Edge", "Brave", "Vivaldi", "Opera"],
-        linux: ["Chromium", "Firefox", "Brave", "Chrome", "Vivaldi", "Opera"],
+        linux: ["Chromium", "Chrome", "Firefox", "Brave", "Vivaldi", "Opera"],
     }
 
     console.log(`Detected OS: ${os}`)
