@@ -29,8 +29,8 @@ const BROWSERS = {
     ],
     linux: [
         { name: "Chromium", cmd: "chromium" },
-        { name: "Firefox", cmd: "firefox" },
         { name: "Chrome", cmd: "google-chrome" },
+        { name: "Firefox", cmd: "firefox" },
         { name: "Brave", cmd: "brave-browser" },
         { name: "Vivaldi", cmd: "vivaldi" },
         { name: "Opera", cmd: "opera" },
